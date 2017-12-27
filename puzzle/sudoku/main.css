@@ -1,0 +1,32 @@
+#field {
+  position: relative;
+  box-sizing: content-box;
+  width: 22em;
+  height: 22em;
+  border: solid thin black;
+}
+
+.block, .cell {
+  position: absolute;
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  width: calc(100% / 3);
+  height: calc(100% / 3);
+  border: solid thin black;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+}
+
+.col-0 { left: 0px; }
+.col-1 { left: calc(100% / 3); }
+.col-2 { left: calc(100% * 2 / 3); }
+
+.row-0 { top: 0px; }
+.row-1 { top: calc(100% / 3); }
+.row-2 { top: calc(100% * 2 / 3); }
