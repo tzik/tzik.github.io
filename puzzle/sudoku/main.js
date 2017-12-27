@@ -1,5 +1,5 @@
 
-import {loadSolver} from "./../websat/websat.js";
+import {loadSolver} from "../websat/websat.js";
 
 let dom_ready = new Promise(resolve => {
   let check = () => {
@@ -117,4 +117,26 @@ function exclusive(solver, xs) {
     }
   });
   clear.removeAttribute('disabled');
+
+  let example = document.getElementById('example');
+  example.addEventListener('click', () => {
+    // From http://www.nature.com/news/mathematician-claims-breakthrough-in-sudoku-puzzle-1.9751
+    let example_input = `   8 1   
+      43 
+5        
+    7 8  
+      1  
+ 2  3    
+6      75
+  34     
+   2  6  `.split('\n').map(x => x.split(''));
+    for (let i of range) {
+      for (let j of range) {
+        let x = example_input[j][i];
+        document.getElementById(`cell-${i}-${j}`).textContent =
+          x.match(/^[1-9]$/) ? x : '';
+      }
+    }
+  });
+  example.removeAttribute('disabled');
 })();
