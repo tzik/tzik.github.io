@@ -122,7 +122,7 @@ function exclusive(solver, xs) {
   example.addEventListener('click', () => {
     // From http://www.nature.com/news/mathematician-claims-breakthrough-in-sudoku-puzzle-1.9751
     let example_input = `   8 1   
-      43 
+       43
 5        
     7 8  
       1  
