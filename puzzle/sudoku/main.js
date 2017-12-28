@@ -1,28 +1,7 @@
 
 import {loadSolver} from "../websat/websat.js";
-
-let dom_ready = new Promise(resolve => {
-  let check = () => {
-    if (document.readyState === 'interactive' ||
-        document.readyState === 'complete') {
-      document.removeEventListener('readystatechange', check);
-      resolve();
-      return;
-    }
-  };
-
-  document.addEventListener('readystatechange', check);
-  check();
-});
-
-function exclusive(solver, xs) {
-  solver.addClause(...xs);
-  for (let i = 0; i < xs.length; ++i) {
-    for (let j = i + 1; j < xs.length; ++j) {
-      solver.addClause(-xs[i], -xs[j]);
-    }
-  }
-}
+import {exclusive} from "../websat/util.js";
+import {dom_ready} from "../common/util.js";
 
 (async () => {
   let solver = await loadSolver();
@@ -92,18 +71,30 @@ function exclusive(solver, xs) {
 
     if (solver.solve(...filled)) {
       let result = solver.extract();
+      let uniq_check = [];
       for (let i of range) {
         for (let j of range) {
           for (let k of range) {
             if (result[vars[i][j][k]] === 'true') {
+              uniq_check.push(-vars[i][j][k]);
               document.getElementById(`cell-${i}-${j}`).textContent = k + 1;
               break;
             }
           }
         }
       }
+
+      let dummy = solver.newLiteral();
+      uniq_check.push(dummy);
+      solver.addClause(...uniq_check);
+      if (!solver.solve(-dummy, ...filled)) {
+        document.getElementById('result').textContent = 'uniquely solvable';
+      } else {
+        document.getElementById('result').textContent = 'solvable';
+      }
+      solver.addClause(dummy);
     } else {
-      
+      document.getElementById('result').textContent = 'unsolvable';
     }
   });
   go.removeAttribute('disabled');
@@ -115,6 +106,7 @@ function exclusive(solver, xs) {
         document.getElementById(`cell-${i}-${j}`).textContent = '';
       }
     }
+    document.getElementById('result').textContent = '';
   });
   clear.removeAttribute('disabled');
 
@@ -137,6 +129,7 @@ function exclusive(solver, xs) {
           x.match(/^[1-9]$/) ? x : '';
       }
     }
+    document.getElementById('result').textContent = '';
   });
   example.removeAttribute('disabled');
 })();
