@@ -6,7 +6,7 @@ export async function loadWasm(url) {
   try {
     return WebAssembly.compileStreaming(response);
   } catch (e) {
-    if (!(e instanceof ReferenceError)) {
+    if (!(e instanceof ReferenceError) && !(e instanceof TypeError)) {
       throw e;
     }
   }
