@@ -1,11 +1,13 @@
 
-import {loadSolver} from "../websat/websat.js";
+import {websat_ready, WebSAT} from "../websat/websat.js";
 import {exclusive} from "../websat/util.js";
 import {dom_ready} from "../common/util.js";
 
 (async () => {
-  let solver = await loadSolver();
+  await websat_ready;
   await dom_ready;
+
+  let solver = new WebSAT();
 
   let n = 3;
   let range = Array.from(new Array(n * n).keys());

@@ -2,13 +2,12 @@
 import {loadWasm} from "./wasm_loader.js";
 import {encodeUTF8, decodeUTF8} from "./text_decoder.js";
 
-function readText(memory, address, length) {
-  return decodeUTF8(new Uint8Array(memory.buffer, address, length));
-}
-
-export async function loadSolver() {
-  let module = await loadWasm('websat.wasm');
-  let memory = new WebAssembly.Memory({initial: 2});
+let module = null;
+let memory = null;
+let instance = null;
+export let websat_ready = (async () => {
+  module = await loadWasm('websat.wasm');
+  memory = new WebAssembly.Memory({initial: 2});
   let env = {
     memory: memory,
     pow: Math.pow,
@@ -20,72 +19,74 @@ export async function loadSolver() {
                       lineno);
     }
   };
-  let instance = await WebAssembly.instantiate(module, {env});
-  return new WebSAT(memory, instance);
+  instance = await WebAssembly.instantiate(module, {env});
+})();
+
+function readText(memory, address, length) {
+  return decodeUTF8(new Uint8Array(memory.buffer, address, length));
 }
 
 export class WebSAT {
-  constructor(memory, solver) {
-    this.memory = memory;
-    this.solver = solver;
-    this.solver.exports.init();
+  constructor() {
+    this.solver = instance.exports.createSolver();
   }
 
   newLiteral() {
-    return this.solver.exports.newLiteral();
+    return instance.exports.newLiteral(this.solver);
   }
 
   addClause(...literals) {
     let length = literals.length;
-    let address = this.solver.exports.malloc(length * 4);
+    let address = instance.exports.malloc(length * 4);
     if (address === 0) {
       throw new Error("OOM");
     }
 
-    let buf = new Int32Array(this.memory.buffer, address, length);
+    let buf = new Int32Array(memory.buffer, address, length);
     buf.set(literals);
     buf = null;
 
-    this.solver.exports.addClause(address, length);
-    this.solver.exports.free(address);
+    instance.exports.addClause(this.solver, address, length);
+    instance.exports.free(address);
   }
 
   solve(...literals) {
     let length = literals.length;
-    let address = this.solver.exports.malloc(length * 4);
+    let address = instance.exports.malloc(length * 4);
     if (address === 0) {
       throw new Error("OOM");
     }
 
-    let buf = new Int32Array(this.memory.buffer, address, length);
+    let buf = new Int32Array(memory.buffer, address, length);
     buf.set(literals);
     buf = null;
 
-    let rv = this.solver.exports.solve(address, length);
-    this.solver.exports.free(address);
+    let rv = instance.exports.solve(this.solver, address, length);
+    instance.exports.free(address);
     return !!rv;
   }
 
   extract() {
-    let length = this.solver.exports.getNVars();
-    let address = this.solver.exports.malloc(length * 4);
+    let length = instance.exports.getNVars(this.solver);
+    let address = instance.exports.malloc(length * 4);
     if (address === 0) {
       throw new Error("OOM");
     }
 
     let m = ['true', 'false', 'undef'];
     let res = ['undef'];
-    this.solver.exports.extract(address, length);
-    let buf = new Uint8Array(this.memory.buffer, address, length);
+    instance.exports.extract(this.solver, address, length);
+    let buf = new Uint8Array(memory.buffer, address, length);
     for (let v of buf) {
       res.push(m[v]);
     }
     buf = null;
-    this.solver.exports.free(address);
+    instance.exports.free(address);
     return res;
   }
 
-  reset() {
-    this.solver.exports.reset();
+  destroy() {
+    instance.exports.destroySolver(this.solver);
+    this.solver = null;
   }
 }
