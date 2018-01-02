@@ -1,5 +1,5 @@
 
-export function exclusive(solver, xs) {
+export function exclusive(solver, ...xs) {
   solver.addClause(...xs);
   for (let i = 0; i < xs.length; ++i) {
     for (let j = i + 1; j < xs.length; ++j) {
@@ -16,13 +16,13 @@ export function equivalent(solver, x, y) {
 
 // g => (x <=> y)
 export function glue(solver, g, x, y) {
-  solver.addClause(~g, ~x, y);
-  solver.addClause(~g, x, ~y);
+  solver.addClause(-g, -x, y);
+  solver.addClause(-g, x, -y);
 }
 
 // (x & y) => g
 export function stick(solver, g, x, y) {
-  solver.addClause(g, ~x, ~y);
+  solver.addClause(g, -x, -y);
 }
 
 function choose(k, f, xs, ys) {
@@ -41,11 +41,13 @@ function choose(k, f, xs, ys) {
     return;
   }
 
-  ys.push(xs.shift());
+  let x = xs.shift();
+  ys.push(x);
   choose(k - 1, f, xs, ys);
   ys.pop();
 
   choose(k, f, xs, ys);
+  xs.unshift(x);
 }
 
 // Less than |k| of |literals| are true.

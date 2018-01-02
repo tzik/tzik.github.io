@@ -1,0 +1,39 @@
+
+#field {
+  display: flex;
+  flex-wrap: wrap;
+  box-sizing: content-box;
+  position: relative;
+  border: solid thin black;
+
+  --x-cells: 5;
+  --y-cells: 5;
+  width: calc(2.4em * var(--x-cells, 5));
+  height: calc(2.4em * var(--y-cells, 5))
+}
+
+.cell {
+  position: relative;
+  box-sizing: border-box;
+  width: calc(100% / var(--x-cells, 5));
+  height: calc(100% / var(--y-cells, 5));
+  border: dashed thin black;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  background-size: cover;
+}
+
+.link-left { background-image: url("link/left.svg"); }
+.link-right { background-image: url("link/right.svg"); }
+.link-up { background-image: url("link/up.svg"); }
+.link-down { background-image: url("link/down.svg"); }
+
+.link-up.link-left { background-image: url("link/up-left.svg"); }
+.link-up.link-right { background-image: url("link/up-right.svg"); }
+.link-down.link-left { background-image: url("link/down-left.svg"); }
+.link-down.link-right { background-image: url("link/down-right.svg"); }
+.link-left.link-right { background-image: url("link/left-right.svg"); }
+.link-up.link-down { background-image: url("link/up-down.svg"); }

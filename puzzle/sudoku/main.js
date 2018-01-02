@@ -49,13 +49,13 @@ import {dom_ready} from "../common/util.js";
 
   for (let i of range) {
     for (let j of range) {
-      exclusive(solver, range.map(k => vars[i][j][k]));
-      exclusive(solver, range.map(k => vars[j][k][i]));
-      exclusive(solver, range.map(k => vars[k][i][j]));
+      exclusive(solver, ...range.map(k => vars[i][j][k]));
+      exclusive(solver, ...range.map(k => vars[j][k][i]));
+      exclusive(solver, ...range.map(k => vars[k][i][j]));
 
       let y = n * (j / n | 0);
       let x = n * (j % n);
-      exclusive(solver, range.map(k => vars[y + (k / n | 0)][x + k % n][i]));
+      exclusive(solver, ...range.map(k => vars[y + (k / n | 0)][x + k % n][i]));
     }
   }
 
