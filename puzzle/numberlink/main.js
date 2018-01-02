@@ -85,7 +85,7 @@ class Numberlink {
         let xs = [];
         for (let d of [LEFT, RIGHT, UP, DOWN])
           xs.push(this.edge(i, j, d));
-        lessThan(this.solver, 3, xs);
+        lessThan(this.solver, 3, ...xs);
       }
     }
   }
@@ -240,13 +240,40 @@ function prepare(w, h) {
   }
 
   for (let i of range(h)) {
+    // let row = document.createElement('div');
+    // row.classList.add('row');
     for (let j of range(w)) {
       let cell = document.createElement('div');
       cell.setAttribute('id', `cell-${j}-${i}`);
       cell.setAttribute('contenteditable', '');
       cell.classList.add('cell');
+      // row.appendChild(cell);
       field.appendChild(cell);
     }
+    // field.appendChild(row);
+  }
+}
+
+function solve(w, h, p, field, nikoli) {
+  let nl;
+  try {
+    nl = new Numberlink(w, h, p);
+    nl.setUpBasicConstraints();
+    if (nikoli)
+      nl.setUpSpanningUniqueConstraints();
+    for (let i of range(h)) {
+      for (let j of range(w)) {
+        if (field[i][j] < 0) {
+          nl.empty(i, j);
+        } else {
+          nl.fill(i, j, field[i][j]);
+        }
+      }
+    }
+
+    return nl.solve() ? nl.extract() : null;
+  } finally {
+    nl.solver.destroy();
   }
 }
 
@@ -282,23 +309,14 @@ function prepare(w, h) {
       field.push(row);
     }
     let p = labels.length;
-    let nl = new Numberlink(w, h, p);
-    nl.setUpBasicConstraints();
-    nl.setUpSpanningUniqueConstraints();
-    for (let i of range(h)) {
-      for (let j of range(w)) {
-        if (field[i][j] < 0) {
-          nl.empty(i, j);
-        } else {
-          nl.fill(i, j, field[i][j]);
-        }
-      }
-    }
-    if (nl.solve()) {
-      let x = nl.extract();
+
+    let result = solve(w, h, p, field, true);
+    if (!result)
+      result = solve(w, h, p, field, false);
+    if (result) {
       for (let i of range(h)) {
         for (let j of range(w)) {
-          let c = x[i][j];
+          let c = result[i][j];
           let elem = document.getElementById(`cell-${j}-${i}`);
           const link_name = ['left', 'right', 'up', 'down'];
           for (let d of c.link) {
@@ -309,10 +327,8 @@ function prepare(w, h) {
       // TODO: Check uniqueness.
       document.getElementById('result').textContent = 'solvable';
     } else {
-      // TODO: Find non-Nikoli solution.
       document.getElementById('result').textContent = 'unsolvable';
     }
-    nl.solver.destroy();
   });
   go.removeAttribute('disabled');
 

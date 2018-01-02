@@ -12,6 +12,9 @@
   height: calc(2.4em * var(--y-cells, 5))
 }
 
+.row {
+}
+
 .cell {
   position: relative;
   box-sizing: border-box;
