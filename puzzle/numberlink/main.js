@@ -311,6 +311,7 @@ function solve(w, h, p, field, nikoli) {
     let p = labels.length;
 
     let result = solve(w, h, p, field, true);
+    let is_nikoli = !!result;
     if (!result)
       result = solve(w, h, p, field, false);
     if (result) {
@@ -325,7 +326,8 @@ function solve(w, h, p, field, nikoli) {
         }
       }
       // TODO: Check uniqueness.
-      document.getElementById('result').textContent = 'solvable';
+      document.getElementById('result').textContent =
+        is_nikoli ? 'solvable as Nikoli instance' : 'solvable';
     } else {
       document.getElementById('result').textContent = 'unsolvable';
     }
