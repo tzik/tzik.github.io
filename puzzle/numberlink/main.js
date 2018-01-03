@@ -187,11 +187,10 @@ class Numberlink {
   }
 
   empty(i, j) {
-    const opposite = [RIGHT, LEFT, DOWN, UP];
     for (let d of [LEFT, RIGHT, UP, DOWN]) {
       let xs = [];
       for (let dd of [LEFT, RIGHT, UP, DOWN]) {
-        xs.push(this.edge(i, j, d == dd ? opposite[dd] : dd));
+        xs.push((d === dd ? -1 : 1) * this.edge(i, j, dd));
       }
       this.solver.addClause(...xs);
     }
@@ -325,9 +324,10 @@ function solve(w, h, p, field, nikoli) {
           }
         }
       }
+
       // TODO: Check uniqueness.
       document.getElementById('result').textContent =
-        is_nikoli ? 'solvable as Nikoli instance' : 'solvable';
+        is_nikoli ? 'solvable as a Nikoli instance' : 'solvable';
     } else {
       document.getElementById('result').textContent = 'unsolvable';
     }
