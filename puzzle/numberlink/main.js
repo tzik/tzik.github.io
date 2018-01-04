@@ -120,7 +120,7 @@ class Numberlink {
         let xs = [];
         for (let d of [LEFT, RIGHT, UP, DOWN])
           xs.push(this.edge(i, j, d));
-        this.solver.addClause(xs);
+        this.solver.addClause(...xs);
       }
     }
   }
